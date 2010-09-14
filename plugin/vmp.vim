@@ -39,6 +39,8 @@ ruby << RUBY
     VIM::Buffer.current[i + 1]
   end.join("\n")
 
+  VIM::Buffer.current.name.nil? ? (name = 'No Name.md') : (name = VIM::Buffer.current.name)
+
   layout = <<-LAYOUT
 <!DOCTYPE html
 PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -49,13 +51,13 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
   <link type="text/css" rel="stylesheet" media="screen" href="file://#{vmp_plugin_dir}/vim-markdown-preview/css/bundle_common.css">
   <link type="text/css" rel="stylesheet" media="screen" href="file://#{vmp_plugin_dir}/vim-markdown-preview/css/bundle_github.css">
 
-  <title> #{File.basename(VIM::Buffer.current.name)} </title>
+  <title> #{File.basename(name)} </title>
   </head>
   <body>
     <div id="main class="subnavd">
       <div class="site">
         <div class="announce mkd" id="readme">
-          <span class="name">#{File.basename(VIM::Buffer.current.name)}</span>
+          <span class="name">#{File.basename(name)}</span>
           <div class="wikistyle">
             #{Kramdown::Document.new(text).to_html}
           </div>
@@ -66,10 +68,10 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 </html>
   LAYOUT
 
-  unless File.extname(VIM::Buffer.current.name) =~ /.(md|mkd|markdown)/
+  unless File.extname(name) =~ /.(md|mkd|markdown)/
     VIM.message('This file extension is not supported for Markdown previews')
   else
-    file = File.join('/tmp', File.basename(VIM::Buffer.current.name) + '.html')
+    file = File.join('/tmp', File.basename(name) + '.html')
     File.open('%s' % [ file ], 'w') { |f| f.write(layout) }
     Vim.command("silent !open '%s'" % [ file ])
   end
@@ -77,3 +79,4 @@ RUBY
 endfunction
 
 :command! Mm :call PreviewMKD()
+
